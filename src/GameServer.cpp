@@ -16,30 +16,8 @@ void GameServer::init()
 	}
 	
 	std::cout << "[SERVER] Initialised TCP listener" << std::endl;
-	
-	for (int i = 0; i < 2; i++) {
-		std::cout << "[SERVER] Waiting for " << 2-i << " clients to join" << std::endl;
-	
-		if (listener.accept(clients[i]) != sf::Socket::Done) {
-			std::cout << "[SERVER] Error accepting connection request from client" << std::endl;
-			return;
-		}
-
-		sf::Packet packet;
-		packet << CLIENT_ASSIGN_ID << i + 1;
-		if (clients[i].send(packet) == sf::Socket::Done) {
-			std::cout << "[SERVER] Assigned playerId of " << i + 1 << " to client " << i << std::endl;
-		} else {
-			std::cout << "[SERVER] Failed to assign playerId to client " << i << std::endl;
-		}
-		
-		selector.add(clients[i]);
-	}
-	
-	std::cout << "[SERVER] Clients have successfully joined" << std::endl;
 	std::cout << "[SERVER] Running server loop in seperate thread" << std::endl;
 	
-	running = true;
 	thread = std::thread(start, this);
 }
 
@@ -60,6 +38,28 @@ void GameServer::start(GameServer* server) { server->run(); }
 
 void GameServer::run()
 {
+	for (int i = 0; i < 2; i++) {
+		std::cout << "[SERVER] Waiting for " << 2-i << " clients to join" << std::endl;
+	
+		if (listener.accept(clients[i]) != sf::Socket::Done) {
+			std::cout << "[SERVER] Error accepting connection request from client" << std::endl;
+			return;
+		}
+
+		sf::Packet packet;
+		packet << CLIENT_ASSIGN_ID << i + 1;
+		if (clients[i].send(packet) == sf::Socket::Done) {
+			std::cout << "[SERVER] Assigned playerId of " << i + 1 << " to client " << i << std::endl;
+		} else {
+			std::cout << "[SERVER] Failed to assign playerId to client " << i << std::endl;
+		}
+		
+		selector.add(clients[i]);
+	}
+	
+	std::cout << "[SERVER] Clients have successfully joined" << std::endl;
+	
+	running = true;
 	while (running) {
 		if (selector.wait(sf::seconds(10.0f))) {
 			for (int i = 0; i < 2; i++) {
@@ -87,7 +87,6 @@ void GameServer::run()
 							logic.takeTurn(player, tile);
 							response << CLIENT_SYNC << logic.currentPlayer << logic.currentMatchState << logic.tiles[0] << logic.tiles[1] << logic.tiles[2] << logic.tiles[3];
 							sendToAll(response);
-							std::cout << "[SERVER] REQUESTED CLIENT SYNC" << std::endl;
 							break;
 						case SERVER_RESET_MATCH:
 							logic.reset();
