@@ -4,8 +4,10 @@
 #include <string>
 #include <iostream>
 
-PlayingState::PlayingState(GameStateManager* game) : GameState(game)
+PlayingState::PlayingState(GameStateManager* game, bool isHost) : GameState(game)
 {
+	this->isHost = isHost;
+	
 	font.loadFromFile("res/belligerent.ttf");
 	texture.loadFromFile("res/spritesheet-hdpi.png");
 	
@@ -48,13 +50,15 @@ PlayingState::PlayingState(GameStateManager* game) : GameState(game)
 }
 
 void PlayingState::init()
-{	
+{
+	if(isHost) server.init();
 	client.init();
 }
 
 void PlayingState::destroy()
 {
 	client.destroy();
+	if (isHost) server.destroy();
 }
 
 void PlayingState::handleEvents(sf::Event event)
@@ -63,6 +67,7 @@ void PlayingState::handleEvents(sf::Event event)
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (activeTile != -1) {
 				sf::Packet packet;
+				logic.takeTurn(client.playerId, activeTile);
 				packet << GameServer::SERVER_TAKE_TURN << client.playerId << activeTile;
 				client.send(packet);
 			}

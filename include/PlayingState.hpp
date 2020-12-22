@@ -3,13 +3,14 @@
 #include "GameState.hpp"
 #include "GameLogic.hpp"
 #include "GameClient.hpp"
+#include "GameServer.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include <thread>
 
 class PlayingState : public GameState {
 public:
-	PlayingState(GameStateManager* game);
+	PlayingState(GameStateManager* game, bool isHost);
 	
 	void init();
 	void destroy();
@@ -21,10 +22,9 @@ private:
 	int activeTile;
 	GameLogic logic;
 	
+	bool isHost;
+	GameServer server;
 	GameClient client;
-	
-	std::thread serverThread;
-	sf::TcpSocket socket;
 
 	sf::Texture texture;
 	sf::Sprite background;

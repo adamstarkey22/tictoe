@@ -9,8 +9,8 @@ CXXFLAGS=-I$(IDIR)
 
 LIBS=-L$(LDIR) -lsfml-graphics -lsfml-window -lsfml-system -lpthread -lsfml-network
 
-_DEPS = GameEngine.hpp GameStateManager.hpp GameState.hpp MenuState.hpp PlayingState.hpp GameLogic.hpp GameServer.hpp GameClient.hpp ServerState.hpp
-_OBJ = main.o GameEngine.o GameStateManager.o MenuState.o PlayingState.o GameLogic.o GameServer.o GameClient.o ServerState.o
+_DEPS = GameEngine.hpp GameStateManager.hpp GameState.hpp MenuState.hpp PlayingState.hpp GameLogic.hpp GameServer.hpp GameClient.hpp
+_OBJ = main.o GameEngine.o GameStateManager.o MenuState.o PlayingState.o GameLogic.o GameServer.o GameClient.o
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))

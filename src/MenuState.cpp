@@ -3,7 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "PlayingState.hpp"
-#include "ServerState.hpp"
 #include "GameLogic.hpp"
 
 MenuState::MenuState(GameStateManager* game) : GameState(game)
@@ -51,7 +50,7 @@ void MenuState::render(sf::RenderWindow* window)
 	if (hostButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
 		hostButton.setStyle(sf::Text::Underlined);
 		if (isMousePressed) {		
-			game->pushState(std::make_shared<ServerState>(game));
+			game->pushState(std::make_shared<PlayingState>(game, true));
 		}
 	} else {
 		hostButton.setStyle(sf::Text::Regular);
@@ -60,7 +59,7 @@ void MenuState::render(sf::RenderWindow* window)
 	if (joinButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
 		joinButton.setStyle(sf::Text::Underlined);
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-			game->pushState(std::make_shared<PlayingState>(game));
+			game->pushState(std::make_shared<PlayingState>(game, false));
 		}
 	} else {
 		joinButton.setStyle(sf::Text::Regular);
