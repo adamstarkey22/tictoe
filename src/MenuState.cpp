@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "PlayingState.hpp"
+#include "ServerState.hpp"
+#include "GameLogic.hpp"
 
 MenuState::MenuState(GameStateManager* game) : GameState(game)
 {
@@ -14,15 +16,22 @@ MenuState::MenuState(GameStateManager* game) : GameState(game)
 	title.setString("Tic Toe");
 	title.setFillColor(sf::Color::Black);
 	
-	playButton.setFont(font);
-	playButton.setString("> Play on this device");
-	playButton.setCharacterSize(25);
-	playButton.setPosition(25, 100);
-	playButton.setFillColor(sf::Color::Black);
+	hostButton.setFont(font);
+	hostButton.setString("> Host a match");
+	hostButton.setCharacterSize(25);
+	hostButton.setPosition(25, 100);
+	hostButton.setFillColor(sf::Color::Black);
+	
+	joinButton.setFont(font);
+	joinButton.setString("> Join a match");
+	joinButton.setCharacterSize(25);
+	joinButton.setPosition(25, 125);
+	joinButton.setFillColor(sf::Color::Black);
 }
 
-void MenuState::init()
-{}
+void MenuState::init() {}
+
+void MenuState::destroy() {}
 
 void MenuState::handleEvents(sf::Event event)
 {
@@ -38,13 +47,26 @@ void MenuState::update(sf::RenderWindow* window)
 void MenuState::render(sf::RenderWindow* window)
 {
 	sf::Vector2i mouse = sf::Mouse::getPosition(*window);
-	if (playButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
-		playButton.setStyle(sf::Text::Underlined);
-		if (isMousePressed) game->pushState(std::make_shared<PlayingState>(game));
+	
+	if (hostButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
+		hostButton.setStyle(sf::Text::Underlined);
+		if (isMousePressed) {		
+			game->pushState(std::make_shared<ServerState>(game));
+		}
 	} else {
-		playButton.setStyle(sf::Text::Regular);
+		hostButton.setStyle(sf::Text::Regular);
 	}
-
-	window->draw(playButton);
+	
+	if (joinButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
+		joinButton.setStyle(sf::Text::Underlined);
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			game->pushState(std::make_shared<PlayingState>(game));
+		}
+	} else {
+		joinButton.setStyle(sf::Text::Regular);
+	}
+	
+	window->draw(hostButton);
+	window->draw(joinButton);
 	window->draw(title);
 }

@@ -40,4 +40,5 @@ GameEngine::GameEngine()
 		window.display();
 */
 	}
+	gameStateManager.popState();
 }

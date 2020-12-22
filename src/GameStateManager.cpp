@@ -9,16 +9,20 @@ GameStateManager::GameStateManager()
 
 void GameStateManager::changeState(std::shared_ptr<GameState> state)
 {
+	states.back()->destroy();
 	states.back() = state;
+	states.back()->init();
 }
 
 void GameStateManager::pushState(std::shared_ptr<GameState> state)
 {
 	states.push_back(state);
+	states.back()->init();
 }
 
 void GameStateManager::popState()
 {
+	states.back()->destroy();
 	states.pop_back();
 }
 

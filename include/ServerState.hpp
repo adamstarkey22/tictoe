@@ -1,12 +1,11 @@
 #pragma once
 
 #include "GameState.hpp"
-#include <SFML/Graphics.hpp>
-#include <string>
+#include "GameServer.hpp"
 
-class MenuState : public GameState {
+class ServerState : public GameState {
 public:
-	MenuState(GameStateManager* game);
+	ServerState(GameStateManager* game);
 	
 	void init();
 	void destroy();
@@ -15,10 +14,7 @@ public:
 	void update(sf::RenderWindow* window);
 	void render(sf::RenderWindow* window);
 private:
-	bool isMousePressed;
-	bool wasMouseDown;
+	GameServer server;
 	sf::Font font;
-	sf::Text title;
-	sf::Text hostButton;
-	sf::Text joinButton;
+	sf::Text text;
 };

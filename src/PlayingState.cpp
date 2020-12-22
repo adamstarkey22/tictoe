@@ -1,6 +1,8 @@
 #include "PlayingState.hpp"
 
+#include "GameServer.hpp"
 #include <string>
+#include <iostream>
 
 PlayingState::PlayingState(GameStateManager* game) : GameState(game)
 {
@@ -43,20 +45,27 @@ PlayingState::PlayingState(GameStateManager* game) : GameState(game)
 	naught.setColor(sf::Color::Blue);
 
 	background.setPosition(200.0f, 100.0f);
-	logic.reset();
 }
 
 void PlayingState::init()
+{	
+	client.init();
+}
+
+void PlayingState::destroy()
 {
+	client.destroy();
 }
 
 void PlayingState::handleEvents(sf::Event event)
 {
-	if (event.type == sf::Event::MouseButtonPressed)
-	{
-		if (event.mouseButton.button == sf::Mouse::Left)
-		{
-			if (activeTile != -1) logic.takeTurn(logic.currentPlayer, activeTile);
+	if (event.type == sf::Event::MouseButtonPressed) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			if (activeTile != -1) {
+				sf::Packet packet;
+				packet << GameServer::SERVER_TAKE_TURN << client.playerId << activeTile;
+				client.send(packet);
+			}
 		}
 	}
 }
@@ -80,41 +89,27 @@ void PlayingState::render(sf::RenderWindow* window)
 	
 	std::string status;
 	
-	if (logic.currentMatchState == logic.MATCH_IN_PROGRESS) {		
-		switch (logic.currentPlayer) {
-			case logic.PLAYER_CROSS:
-				status = "Player 1 turn";
-				break;
-			case logic.PLAYER_NAUGHT:
-				status = "Player 2 turn";
-				break;
-			default:
-				status = "Hmmm...";
-		}
+	if (client.logic.currentMatchState == client.logic.MATCH_IN_PROGRESS) {
+		if (client.playerId == client.logic.currentPlayer) status = "Your turn";
+		else status = "Waiting for other player";
 	} else {
-		switch (logic.currentPlayer) {
-			case logic.PLAYER_CROSS:
-				status = "Player 1 wins!";
-				break;
-			case logic.PLAYER_NAUGHT:
-				status = "Player 2 wins!";
-				break;
-			default:
-				status = "OK, what the actual fuck?";
-		}
+		if (client.playerId == client.logic.currentPlayer) status = "You win!";
+		else status = "You lose!";
 	}
 
 	text.setString(status);
-	
+
 	if (restartButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
 		restartButton.setStyle(sf::Text::Underlined);
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-			logic.reset();
+			sf::Packet packet;
+			packet << GameServer::SERVER_RESET_MATCH;
+			client.send(packet);
 		}
 	} else {
 		restartButton.setStyle(sf::Text::Regular);
 	}
-	
+
 	if (quitButton.getGlobalBounds().contains(mouse.x, mouse.y)) {
 		quitButton.setStyle(sf::Text::Underlined);
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
@@ -134,29 +129,28 @@ void PlayingState::render(sf::RenderWindow* window)
 		int tileX = background.getGlobalBounds().left + i % 2 * background.getGlobalBounds().width / 2;
 		int tileY = background.getGlobalBounds().top + i / 2 * background.getGlobalBounds().height / 2;
 		
-		switch (logic.tiles[i]) {
-			case logic.PLAYER_CROSS:
+		switch (client.logic.tiles[i]) {
+			case client.logic.PLAYER_CROSS:
 				cross.setPosition(tileX, tileY);
 				window->draw(cross);
 				break;
-			case logic.PLAYER_NAUGHT:
+			case client.logic.PLAYER_NAUGHT:
 				naught.setPosition(tileX, tileY);
 				window->draw(naught);
 				break;
 			default:
-				if (activeTile == i && logic.currentMatchState == logic.MATCH_IN_PROGRESS) {					
-					switch (logic.currentPlayer) {
-						case logic.PLAYER_CROSS:
+				if (activeTile == i && client.logic.currentMatchState == client.logic.MATCH_IN_PROGRESS && client.logic.currentPlayer == client.playerId) {					
+					switch (client.playerId) {
+						case client.logic.PLAYER_CROSS:
 							ghostCross.setPosition(tileX, tileY);
 							window->draw(ghostCross);
 							break;
-						case logic.PLAYER_NAUGHT:
+						case client.logic.PLAYER_NAUGHT:
 							ghostNaught.setPosition(tileX, tileY);
 							window->draw(ghostNaught);
 							break;
 					}
 				}
-				
 		}
 
 	}
