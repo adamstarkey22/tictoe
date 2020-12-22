@@ -20,15 +20,10 @@ GameEngine::GameEngine()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
-				window.close();
+			if (event.type == sf::Event::Closed) window.close();
 			gameStateManager.handleEvents(event);
-			gameStateManager.update(&window);
-			window.clear(sf::Color::White);
-			gameStateManager.render(&window);
-			window.display();
 		}
-/*
+
 		while (lag >= delta)
 		{
 			lag -= delta;
@@ -38,7 +33,6 @@ GameEngine::GameEngine()
 		window.clear(sf::Color::White);
 		gameStateManager.render(&window);
 		window.display();
-*/
 	}
 	gameStateManager.popState();
 }
