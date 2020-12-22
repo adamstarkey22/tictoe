@@ -14,15 +14,7 @@ void GameClient::init() {
 		std::cout << "[CLIENT] Failed to connect to server" << std::endl;
 		return;
 	}
-	
-	sf::Packet packet;
-	int request;
-	int id;
-	socket.receive(packet);
-	packet >> request >> id;
-	//playerId = id;
-	playerId = 1;
-	
+
 	std::cout << "[CLIENT] Running client loop in seperate thread" << std::endl;
 	thread = std::thread(start, this);
 }
@@ -44,6 +36,7 @@ void GameClient::start(GameClient* client) { client->run(); }
 
 void GameClient::run()
 {
+	running = true;
 	while (running) {
 		sf::Packet packet;
 		if (socket.receive(packet) == sf::Socket::Done) {
@@ -62,11 +55,10 @@ void GameClient::run()
 		switch (request) {
 			case GameServer::CLIENT_SYNC:
 				packet >> logic.currentPlayer >> logic.currentMatchState >> logic.tiles[0] >> logic.tiles[1] >> logic.tiles[2] >> logic.tiles[3];
-				std::cout << "[CLIENT] UPDATED GAMELOGIC" << std::endl;
 				break;
 			case GameServer::CLIENT_ASSIGN_ID:
-				//packet >> playerId;
-				//std::cout << "[CLIENT] Received player id of " << playerId << std::endl;
+				packet >> playerId;
+				std::cout << "[CLIENT] Received player id of " << playerId << std::endl;
 				break;
 		}
 	}
